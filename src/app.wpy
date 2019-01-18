@@ -3,17 +3,50 @@
 
 <script>
 import wepy from 'wepy'
+import 'wepy-async-function'
 
 export default class extends wepy.app {
+  constructor() {
+    super()
+    this.use('promisify')
+  }
   config = {
     pages: [
-      'pages/index'
+      'pages/index', 'pages/category', 'pages/cart', 'pages/my'
     ],
     window: {
-      backgroundTextStyle: 'light',
-      navigationBarBackgroundColor: '#fff',
-      navigationBarTitleText: 'WeChat',
-      navigationBarTextStyle: 'black'
+      navigationBarBackgroundColor: '#ff2d4a',
+      navigationBarTitleText: '手机商城',
+      navigationBarTextStyle: 'white'
+    },
+    tabBar: {
+      selectedColor: '#ff2d4a',
+      list: [
+        {
+          pagePath: 'pages/index',
+          text: '首页',
+          iconPath: '/assets/images/icon_home@3x.png',
+          selectedIconPath: '/assets/images/icon_home_active@3x.png'
+        },
+        {
+          pagePath: 'pages/category',
+          text: '分类',
+          iconPath: '/assets/images/icon_category@3x.png',
+          selectedIconPath: '/assets/images/icon_category_active@3x.png'
+        },
+        {
+          pagePath: 'pages/cart',
+          text: '购物车',
+          iconPath: '/assets/images/icon_cart@3x.png',
+          selectedIconPath: '/assets/images/icon_cart_active@3x.png'
+        },
+        {
+          pagePath: 'pages/my',
+          text: '我的',
+          iconPath: '/assets/images/icon_me@3x.png',
+          selectedIconPath: '/assets/images/icon_me_active@3x.png'
+        }
+      ]
     }
   }
 

@@ -1,5 +1,5 @@
 {
-  "name": "shopmall",
+  "name": "mp-shop",
   "version": "0.0.1",
   "description": "A WePY project",
   "main": "dist/app.js",
@@ -11,7 +11,8 @@
   "author": "Nocky <cocytus1223@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "wepy": "^1.6.0"
+    "wepy": "^1.6.0",
+    "wepy-async-function": "^1.4.7"
   },
   "devDependencies": {
     "babel-eslint": "^7.2.1",

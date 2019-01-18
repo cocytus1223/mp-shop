@@ -1,15 +1,16 @@
 {
 	"description": "A WePY project",
 	"setting": {
-		"urlCheck": true,
+		"urlCheck": false,
 		"es6": false,
 		"postcss": false,
 		"minified": false,
-		"newFeature": true
+		"newFeature": true,
+		"autoAudits": false
 	},
 	"compileType": "miniprogram",
 	"appid": "wxf6ba64e254475c3f",
-	"projectname": "shopmall",
+	"projectname": "mp-shop",
 	"miniprogramRoot": "dist/",
 	"condition": {}
 }
