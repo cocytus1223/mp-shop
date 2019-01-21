@@ -1,4 +1,11 @@
 <template>
+  <!-- 搜索框 -->
+  <view class="search">
+    <view class="search-bar">
+      <text class="iconfont icon-sousuo"></text>
+      <text class="word">搜索</text>
+    </view>
+  </view>
   <!-- 轮播图 -->
   <swiper
     indicator-dots
@@ -66,6 +73,16 @@
         </navigator>
       </view>
     </view>
+  </view>
+
+  <!-- 回到顶部 -->
+  <view
+    class="go-top"
+    @tap="goTop"
+    hidden="{{isHide}}"
+  >
+    <text class="iconfont icon-jiantoushang"></text>
+    <text>顶部</text>
   </view>
 </template>
 
@@ -215,12 +232,23 @@ export default class Index extends wepy.page {
   data = {
     imgList: [],
     navList: [],
-    floorList: []
+    floorList: [],
+    isHide: true
   }
   onLoad() {
     this.getImgList()
     this.getNavList()
     this.getFloorList()
+  }
+
+  // 页面滚动这个操作是比较效果性能，页面滚动在小程序中是异步的
+  onPageScroll(query) {
+    if (query.scrollTop >= 300) {
+      this.isHide = false
+    } else {
+      this.isHide = true
+    }
+    this.$apply()
   }
 
   async getImgList() {
@@ -242,12 +270,46 @@ export default class Index extends wepy.page {
     this.floorList = res.data.data
     this.$apply()
   }
+
+  goTop() {
+    wepy.pageScrollTo({
+      scrollTop: 0,
+      duration: 1000
+    })
+  }
 }
 </script>
 
 <style lang="less">
+@import '../assets/wxss/icon-font.wxss';
+.search {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  box-sizing: border-box;
+  z-index: 999;
+  padding: 20rpx 16rpx;
+  background-color: #ff2d4a;
+
+  &-bar {
+    background-color: #fff;
+    height: 60rpx;
+    width: 718rpx;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #bbb;
+
+    .word {
+      margin-left: 16rpx;
+      font-size: 24rpx;
+    }
+  }
+}
+
 page {
   background-color: #eee;
+  padding-top: 100rpx;
 }
 swiper {
   width: 750rpx;
@@ -313,5 +375,20 @@ swiper {
       }
     }
   }
+}
+.go-top {
+  width: 100rpx;
+  height: 100rpx;
+  position: fixed;
+  z-index: 999;
+  bottom: 20rpx;
+  right: 20rpx;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  font-size: 28rpx;
+  justify-content: center;
+  align-items: center;
 }
 </style>
