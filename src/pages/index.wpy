@@ -71,6 +71,7 @@
 
 <script>
 import wepy from 'wepy'
+import fetch from '../utils/fetch'
 
 const floorData = {
   data: [
@@ -223,25 +224,19 @@ export default class Index extends wepy.page {
   }
 
   async getImgList() {
-    let res = await wepy.request({
-      url: `https://itjustfun.cn/api/public/v1/home/swiperdata`
-    })
+    let res = await fetch('home/swiperdata')
     this.imgList = res.data.data
     this.$apply()
   }
 
   async getNavList() {
-    let res = await wepy.request({
-      url: `https://itjustfun.cn/api/public/v1/home/catitems`
-    })
+    let res = await fetch('home/catitems')
     this.navList = res.data.data
     this.$apply()
   }
 
   async getFloorList() {
-    let res = await wepy.request({
-      url: `https://itjustfun.cn/api/public/v1/home/floordata`
-    })
+    let res = await fetch('home/floordata')
 
     res.data = floorData
     this.floorList = res.data.data
