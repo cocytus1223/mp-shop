@@ -1,22 +1,458 @@
 
 <template>
-  <view class="container">
-    商品详情页
+  <!-- 商品详情页 -->
+  <swiper
+    class="swiper"
+    indicator-dots="{{ true }}"
+    indicator-color="rgba(255,255,255,.5)"
+    indicator-active-color="#ffffff"
+    interval="{{2500}}"
+    autoplay="{{true}}"
+    circular="{{true}}"
+  >
+    <block
+      wx:for="{{detail.pics}}"
+      wx:key="pics_id"
+    >
+      <swiper-item>
+        <image
+          class="swiper-img"
+          src="{{item.pics_big_url}}"
+        />
+      </swiper-item>
+    </block>
+  </swiper>
+
+  <view class="product-info">
+    <view class="product-head">
+      <text class="price">￥ {{detail.goods_price}}</text>
+    </view>
+    <view class="product-body">
+      <view class="product-name">
+        {{detail.goods_name}}
+      </view>
+      <view class="product-like">
+        <view class="iconfont icon-shoucang"></view>
+        <view>收藏</view>
+      </view>
+    </view>
+    <view class="product-foot">
+      快递：<text>免运费</text>
+    </view>
+  </view>
+  <view class="part">
+    <view class="part-item part-line">
+      <text class="note">促销</text><text class="description color-main">满300减30元</text>
+    </view>
+    <view class="part-item">
+      <text class="note">已选</text><text class="description">黑色/S/1件</text>
+    </view>
+  </view>
+  <view class="part">
+    <view class="part-item">
+      <text class="note">送至</text><text
+        @tap="chooseAddress"
+        class="description"
+      >{{address}}</text>
+      <view class="iconfont icon-jiantouyou"></view>
+    </view>
+  </view>
+
+  <view class="tabs">
+    <view class="tabs-head">
+      <block>
+        <view
+          @tap="changeTab({{1}})"
+          class="tabs-item {{activeIndex === 1 ? 'active' : ''}}"
+        >
+          图文详情
+        </view>
+        <view
+          @tap="changeTab({{2}})"
+          class="tabs-item {{activeIndex === 2 ? 'active' : ''}}"
+        >
+          规格参数
+        </view>
+      </block>
+    </view>
+    <view class="tabs-body">
+      <view
+        class="tabs-content introduce"
+        hidden="{{activeIndex != 1}}"
+      >
+        <import src="../assets/wxParse/wxParse.wxml" />
+        <template
+          is="wxParse"
+          data="{{wxParseData:introduce.nodes}}"
+        >
+        </template>
+      </view>
+
+      <view
+        class="tabs-content"
+        hidden="{{activeIndex != 2}}"
+      >
+        <block
+          wx:for="{{detail.attrs}}"
+          wx:key="attr_id"
+        >
+          <view class="param-item">
+            <text class="note">{{item.attr_name}}</text>
+            <text class="description">{{item.attr_value}}</text>
+          </view>
+        </block>
+      </view>
+    </view>
+  </view>
+
+  <view class="fixed-bar">
+    <view class="item">
+      <button
+        open-type="contact"
+        class="contact-btn"
+      >客服按钮</button>
+      <view class="iconfont icon-kefu"></view>
+      <text class="item-note">联系客服</text>
+    </view>
+    <navigator
+      url="/pages/cart"
+      open-type="switchTab"
+      class="item"
+    >
+      <view class="iconfont icon-gouwuche"></view>
+      <text class="item-note">购物车</text>
+    </navigator>
+    <view class="btn-group">
+      <view
+        class="btn yellow-button"
+        @tap="addCart"
+      >加入购物车</view>
+      <view class="btn red-button">立即购买</view>
+    </view>
   </view>
 </template>
 
 <script>
 import wepy from 'wepy'
+import fetch from '../utils/fetch'
+import WxParse from '../assets/wxParse/wxParse'
 
-export default class GoodsDetail extends wepy.page {
+export default class Index extends wepy.page {
   config = {
-    navigationBarTitleText: '商品详情页'
+    navigationBarTitleText: '详情页',
+    navigationBarBackgroundColor: '#ff2d4a',
+    navigationBarTextStyle: 'white'
   }
-  onLoad() {
-    console.log('onLoad')
+
+  data = {
+    id: '',
+    detail: {},
+    address: '请选择收货地址',
+    activeIndex: 1
+  }
+
+  methods = {
+    async chooseAddress() {
+      let res = await wepy.chooseAddress()
+      console.log(res)
+      // 拼接一个地址
+      this.address = `${res.provinceName}${res.cityName}${res.countyName}${res.detailInfo}`
+      this.$apply()
+
+      // 把地址存储起来
+      wepy.setStorageSync('address', res)
+    },
+    changeTab(index) {
+      this.activeIndex = index
+    }
+  }
+
+  onLoad(query) {
+    this.id = query.goods_id
+    this.getDetail()
+    this.getAddress()
+  }
+
+  async getDetail() {
+    let res = await fetch(`goods/detail?goods_id=${this.id}`)
+    // console.log(res)
+    this.detail = res.data.data
+    WxParse.wxParse('introduce', 'html', this.detail.goods_introduce, this)
+    this.$apply()
+  }
+
+  getAddress() {
+    // 从缓存中获取到address信息， 拼接给this.address
+    let res = wepy.getStorageSync('address')
+    if (!res) return
+    this.address = `${res.provinceName}${res.cityName}${res.countyName}${res.detailInfo}`
+  }
+
+  wxParseImgLoad() { }
+
+  addCart() {
+    let cart = wepy.getStorageSync('cart') || []
+    let { goods_id, goods_name, goods_small_logo, goods_price } = this.detail
+    let goods = cart.find(item => item.goods_id === this.detail.goods_id)
+    if (!goods) {
+      cart.push({
+        goods_id,
+        goods_name,
+        goods_small_logo,
+        goods_price,
+        goods_num: 1,
+        isChecked: true
+      })
+    } else {
+      goods.goods_num++
+    }
+    wepy.setStorageSync('cart', cart)
+
+    wepy.showToast({
+      title: '添加购物车成功',
+      icon: 'success',
+      mask: true
+    })
   }
 }
 </script>
 
 <style lang="less">
+@import '../assets/wxss/icon-font.wxss';
+@import '../assets/wxParse/wxParse.wxss';
+.swiper,
+.swiper-img {
+  width: 750rpx;
+  height: 720rpx;
+}
+
+.product-info {
+  height: 300rpx;
+  background-color: #fff;
+  padding: 0 16rpx;
+}
+.product-head {
+  height: 80rpx;
+  .price {
+    color: #ff2d4a;
+    font-size: 50rpx;
+    margin-left: -10rpx;
+  }
+  .old-price {
+    color: #999;
+    font-size: 26rpx;
+  }
+}
+.product-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  .product-name {
+    font-size: 34rpx;
+    width: 546rpx;
+    height: 88rpx;
+    line-height: 1.3;
+    /* 多行文字隐藏省略号 */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  .product-like {
+    width: 50rpx;
+    height: 78rpx;
+    border-left: 1rpx solid #ddd;
+    padding-left: 46rpx;
+    margin-right: 30rpx;
+    color: #999;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 24rpx;
+  }
+  .icon-shoucang {
+    width: 32rpx;
+    height: 32rpx;
+    margin-top: 10rpx;
+  }
+}
+
+.product-foot {
+  font-size: 30rpx;
+  color: #999;
+  margin-top: 34rpx;
+}
+
+.part {
+  background-color: #fff;
+  margin: 20rpx 0;
+  font-size: 32rpx;
+  color: #999;
+
+  .part-line {
+    overflow: hidden;
+  }
+
+  &-item {
+    display: flex;
+    padding: 28rpx 16rpx;
+    position: relative;
+    align-items: center;
+  }
+
+  &-line:after {
+    content: '';
+    height: 1rpx;
+    width: 734rpx;
+    background-color: #ddd;
+    display: block;
+    position: absolute;
+    bottom: -1rpx;
+  }
+  .note {
+    color: #333;
+    margin-right: 40rpx;
+  }
+  .description {
+    width: 490rpx;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    word-wrap: normal;
+  }
+  .icon-jiantouyou {
+    width: 25rpx;
+    height: 25rpx;
+    color: #ccc;
+    position: absolute;
+    right: 46rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.tabs-head {
+  height: 100rpx;
+  background-color: #fff;
+  display: flex;
+}
+.tabs-head .tabs-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30rpx;
+  position: relative;
+}
+.tabs-head .active {
+  color: #ff2d4a;
+  font-weight: 400;
+}
+.tabs-head .active:after {
+  content: '';
+  height: 12rpx;
+  width: 100%;
+  background-color: #ff2d4a;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+}
+.tabs-body {
+  padding: 16rpx;
+  padding-bottom: 250rpx;
+
+  .introduce {
+    text-align: center;
+    image {
+      vertical-align: middle;
+    }
+  }
+}
+.param-item {
+  padding: 30rpx 0;
+  font-size: 28rpx;
+  display: flex;
+  align-items: center;
+}
+.param-item .note {
+  width: 150rpx;
+  color: #999;
+}
+.param-item .description {
+  width: 568rpx;
+  line-height: 1.3;
+}
+
+.fixed-bar {
+  width: 750rpx;
+  height: 98rpx;
+  background-color: #fff;
+  position: fixed;
+  bottom: 0;
+  z-index: 11;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.fixed-bar .item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.fixed-bar .item .iconfont {
+  width: 40rpx;
+  height: 40rpx;
+  font-size: 40rpx;
+  color: #999;
+}
+
+.fixed-bar .item .item-note {
+  margin-top: 10rpx;
+  font-size: 22rpx;
+  color: #666;
+}
+.fixed-bar .btn-group {
+  display: flex;
+}
+.fixed-bar .btn {
+  width: 213rpx;
+  height: 98rpx;
+  line-height: 98rpx;
+  text-align: center;
+  font-size: 30rpx;
+  color: #fff;
+}
+.yellow-button {
+  background-color: #ffb400;
+}
+.red-button {
+  background-color: #ff2d4a;
+}
+
+.wxParse-content {
+  padding: 55rpx;
+
+  .wxParse-a {
+    display: none;
+  }
+  .wxParse-div {
+    display: flex;
+    justify-content: center;
+  }
+}
+.contact-btn {
+  opacity: 0;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+.fixed-bar .item {
+  position: relative;
+}
 </style>

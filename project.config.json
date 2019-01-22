@@ -12,5 +12,31 @@
 	"appid": "wxf6ba64e254475c3f",
 	"projectname": "mp-shop",
 	"miniprogramRoot": "dist/",
-	"condition": {}
+	"condition": {
+		"search": {
+			"current": -1,
+			"list": []
+		},
+		"conversation": {
+			"current": -1,
+			"list": []
+		},
+		"plugin": {
+			"current": -1,
+			"list": []
+		},
+		"game": {
+			"list": []
+		},
+		"miniprogram": {
+			"current": 0,
+			"list": [
+				{
+					"id": -1,
+					"name": "详情页",
+					"pathName": "pages/goods_detail"
+				}
+			]
+		}
+	}
 }

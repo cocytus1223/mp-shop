@@ -20,7 +20,7 @@
         open-type="{{item.open_type}}"
         url="{{item.navigator_url}}"
       >
-        <image src="{{item.image_src}}"></image>
+        <image src="{{item.image_src}}" />
       </navigator>
     </swiper-item>
   </swiper>
@@ -34,7 +34,7 @@
       wx:for="{{navList}}"
       wx:key="name"
     >
-      <image src="{{item.image_src}}"></image>
+      <image src="{{item.image_src}}" />
     </navigator>
   </view>
 
@@ -45,7 +45,7 @@
     wx:key="*this"
   >
     <view class="floor-title">
-      <image src="{{item.floor_title.image_src}}"></image>
+      <image src="{{item.floor_title.image_src}}" />
     </view>
     <view class="floor-content">
       <view class="left">
@@ -53,7 +53,7 @@
           url="{{item.product_list[0].navigator_url}}"
           open-type="{{item.product_list[0].open_type}}"
         >
-          <image src="{{item.product_list[0].image_src}}"></image>
+          <image src="{{item.product_list[0].image_src}}" />
         </navigator>
       </view>
       <view class="right">
@@ -69,7 +69,7 @@
           <image
             src="{{image.image_src}}"
             style="width: {{image.image_width}}rpx"
-          ></image>
+          />
         </navigator>
       </view>
     </view>
@@ -278,6 +278,7 @@ export default class Index extends wepy.page {
     })
   }
 }
+
 </script>
 
 <style lang="less">
