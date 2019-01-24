@@ -91,6 +91,7 @@
     <view
       wx:else
       class="login-btn order-pay-btn"
+      @tap="wxPay"
     >微信支付</view>
   </view>
 
@@ -102,7 +103,7 @@ import fetch from '../utils/fetch'
 
 export default class CartOrder extends wepy.page {
   config = {
-    navigationBarTitleText: '确认订单',
+    navigationBarTitleText: '支付页',
     backgroundColor: '#fff'
   }
 
@@ -152,6 +153,93 @@ export default class CartOrder extends wepy.page {
       wepy.showToast({
         title: '登录成功了'
       })
+    },
+    async wxPay() {
+      let order_price = this.totalMoney
+      // console.log(order_price)
+      let consignee_addr = this.address.userAddress
+      if (!consignee_addr) {
+        wepy.showToast({
+          title: '请先选择收获地址',
+          icon: 'none'
+        })
+        return
+      }
+      // console.log(consigneeAddr)
+      let order_detail = JSON.stringify(this.orderList)
+      // console.log(orderDetail)
+      let goods = this.orderList.map(item => {
+        return {
+          goods_id: item.goods_id,
+          goods_number: item.goods_num,
+          goods_price: item.goods_price
+        }
+      })
+      // console.log(goods)
+      let data = {
+        order_price,
+        consignee_addr,
+        order_detail,
+        goods
+      }
+      // console.log(data)
+      let resCreate = await fetch({
+        url: 'my/orders/create',
+        method: 'POST',
+        type: 'local',
+        data,
+        header: {
+          Authorization: this.token
+        }
+      })
+      // console.log(resCreate)
+      let order_number = resCreate.data.data.order_number
+      // console.log(order_number)
+      let resPrePay = await fetch({
+        url: 'my/orders/req_unifiedorder',
+        method: 'POST',
+        data: {
+          order_number
+        },
+        type: 'local',
+        header: {
+          Authorization: this.token
+        }
+      })
+      console.log(resPrePay)
+      let wxorder = resPrePay.data.data.wxorder
+
+      try {
+        let resPay = await wepy.requestPayment(wxorder)
+        // console.log(resPay)
+        let res = await fetch({
+          url: 'my/orders/chkOrder',
+          type: 'local',
+          data: {
+            order_number
+          },
+          method: 'POST',
+          header: {
+            Authorization: this.token
+          }
+        })
+        // console.log(res)
+        if (res.data.meta.status === 200) {
+          wepy.navigateTo({
+            url: '/pages/orders?type=3'
+          })
+        } else {
+          wepy.showToast({
+            title: '支付异常，请联系管理员',
+            icon: 'none'
+          })
+        }
+      } catch (error) {
+        wepy.showToast({
+          title: '用户取消了支付',
+          icon: 'none'
+        })
+      }
     }
   }
 
