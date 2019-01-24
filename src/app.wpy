@@ -20,7 +20,8 @@ export default class extends wepy.app {
   }
   config = {
     pages: [
-      'pages/index', 'pages/category', 'pages/cart', 'pages/my', 'pages/goods_detail', 'pages/goods_list', 'pages/cart_order'
+      'pages/index', 'pages/category', 'pages/cart', 'pages/my', 'pages/goods_detail', 'pages/goods_list', 'pages/cart_order',
+      'pages/orders'
     ],
     window: {
       navigationBarBackgroundColor: '#ff2d4a',
