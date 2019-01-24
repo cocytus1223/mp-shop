@@ -120,6 +120,7 @@ export default class CartOrder extends wepy.page {
   }
 
   methods = {
+    // 获取地址
     async chooseAddress() {
       let res = await wepy.chooseAddress()
       wepy.setStorageSync('address', res)
@@ -155,6 +156,7 @@ export default class CartOrder extends wepy.page {
       })
     },
     async wxPay() {
+      // 生成订单
       let order_price = this.totalMoney
       // console.log(order_price)
       let consignee_addr = this.address.userAddress
@@ -183,14 +185,12 @@ export default class CartOrder extends wepy.page {
         goods
       }
       // console.log(data)
+      // 订单预支付
       let resCreate = await fetch({
         url: 'my/orders/create',
         method: 'POST',
         type: 'local',
-        data,
-        header: {
-          Authorization: this.token
-        }
+        data
       })
       // console.log(resCreate)
       let order_number = resCreate.data.data.order_number
@@ -201,15 +201,13 @@ export default class CartOrder extends wepy.page {
         data: {
           order_number
         },
-        type: 'local',
-        header: {
-          Authorization: this.token
-        }
+        type: 'local'
       })
       console.log(resPrePay)
       let wxorder = resPrePay.data.data.wxorder
 
       try {
+        // 调用微信支付api进行支付
         let resPay = await wepy.requestPayment(wxorder)
         // console.log(resPay)
         let res = await fetch({
@@ -218,10 +216,7 @@ export default class CartOrder extends wepy.page {
           data: {
             order_number
           },
-          method: 'POST',
-          header: {
-            Authorization: this.token
-          }
+          method: 'POST'
         })
         // console.log(res)
         if (res.data.meta.status === 200) {

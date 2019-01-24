@@ -9,6 +9,14 @@ export default class extends wepy.app {
   constructor() {
     super()
     this.use('promisify')
+
+    // 请求拦截
+    this.intercept('request', {
+      config(p) {
+        p.header.Authorization = wepy.getStorageSync('token')
+        return p
+      }
+    })
   }
   config = {
     pages: [
